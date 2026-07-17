@@ -4,12 +4,13 @@ import { Referral, User } from '../types';
 import { initTelegram } from '../lib/telegram';
 import { t } from '../lib/i18n';
 
-// Khai báo cấu trúc Props truyền vào từ App.tsx để sửa lỗi TypeScript
+// Khai báo đầy đủ cấu trúc Props truyền vào từ App.tsx để tránh lỗi TS2322
 interface InviteTabProps {
   user: User;
 }
 
-export const InviteTab: React.FC<InviteTabProps> = ({ user }) => {
+// Giữ nguyên định nghĩa InviteTabProps nhưng không bóc tách 'user' để tránh lỗi TS6133 (unused variable)
+export const InviteTab: React.FC<InviteTabProps> = () => {
   const [referralInfo, setReferralInfo] = useState<any>(null);
   const [referrals, setReferrals] = useState<Referral[]>([]);
   const [loading, setLoading] = useState(true);
