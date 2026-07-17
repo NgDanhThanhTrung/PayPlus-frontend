@@ -3,8 +3,15 @@ import { apiClient } from '../lib/api';
 import { initAdsgram } from '../lib/adsgram';
 import { initTelegram } from '../lib/telegram';
 import { t } from '../lib/i18n';
+import { User } from '../types';
 
-export const AdsTab: React.FC = () => {
+// Định nghĩa Interface nhận vào Props từ App.tsx để sửa lỗi biên dịch TypeScript
+interface AdsTabProps {
+  user: User;
+  onRefreshUser: () => Promise<void>;
+}
+
+export const AdsTab: React.FC<AdsTabProps> = ({ user, onRefreshUser }) => {
   const [remainingAds, setRemainingAds] = useState(15);
   const [loading, setLoading] = useState(false);
   const [adsgramBlockId, setAdsgramBlockId] = useState('0');
@@ -70,9 +77,10 @@ export const AdsTab: React.FC = () => {
         haptic?.notification('success');
         alert('🎉 Bạn đã xem hết quảng cáo! Phần thưởng đang được xử lý cộng vào tài khoản của bạn.');
         
-        // Chờ 1.5 giây để webhook phía backend cập nhật database xong rồi tải lại số lượt còn lại
-        setTimeout(() => {
+        // Chờ 1.5 giây để webhook phía backend cập nhật database xong rồi tải lại số lượt còn lại và ví tiền
+        setTimeout(async () => {
           loadAdStatus();
+          await onRefreshUser(); // Tự động cập nhật lại số dư vàng hiển thị trên Header
         }, 1500);
       } else {
         haptic?.notification('error');
