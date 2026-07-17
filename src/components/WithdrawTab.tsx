@@ -1,10 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { apiClient } from '../lib/api';
-import { Withdrawal } from '../types';
+import { Withdrawal, User } from '../types';
 import { initTelegram } from '../lib/telegram';
 import { t } from '../lib/i18n';
 
-export const WithdrawTab: React.FC = () => {
+// Định nghĩa Interface nhận vào Props từ App.tsx để sửa dứt điểm lỗi biên dịch TypeScript
+interface WithdrawTabProps {
+  user: User;
+  onRefreshUser: () => Promise<void>;
+}
+
+export const WithdrawTab: React.FC<WithdrawTabProps> = ({ user, onRefreshUser }) => {
   const [withdrawals, setWithdrawals] = useState<Withdrawal[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -68,7 +74,12 @@ export const WithdrawTab: React.FC = () => {
         currency: 'USDT',
         walletAddress: '',
       });
+      
+      // Đồng bộ lại danh sách lịch sử rút tiền
       loadWithdrawals();
+      
+      // Tự động làm mới số dư ví của User hiển thị trên Header (trừ bớt số vàng vừa rút)
+      await onRefreshUser();
     } catch (error: any) {
       console.error('Withdrawal error:', error);
       haptic?.notification('error');
