@@ -4,12 +4,13 @@ import { Task, User } from '../types';
 import { initTelegram } from '../lib/telegram';
 import { t } from '../lib/i18n';
 
-// Khai báo cấu trúc Props đồng bộ nhận vào object user từ App.tsx
+// Bổ sung onRefreshUser vào interface để khớp với App.tsx
 interface TasksTabProps {
   user: User;
+  onRefreshUser: () => Promise<void>;
 }
 
-// Giữ cấu trúc Props nhưng không bóc tách biến 'user' để tránh lỗi TS6133 (unused variable)
+// Không bóc tách biến để tránh lỗi TS6133 (unused variable) nếu chưa dùng tới
 export const TasksTab: React.FC<TasksTabProps> = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [completedTaskIds, setCompletedTaskIds] = useState<string[]>([]);
