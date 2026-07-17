@@ -1,4 +1,6 @@
 import axios from 'axios';
+// Bước 1: Import các Type/Interface từ file types.ts
+import { Config, User, Task } from '../types'; 
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
