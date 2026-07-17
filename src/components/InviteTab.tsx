@@ -1,10 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { apiClient } from '../lib/api';
-import { Referral } from '../types';
+import { Referral, User } from '../types';
 import { initTelegram } from '../lib/telegram';
 import { t } from '../lib/i18n';
 
-export const InviteTab: React.FC = () => {
+// Khai báo cấu trúc Props truyền vào từ App.tsx để sửa lỗi TypeScript
+interface InviteTabProps {
+  user: User;
+}
+
+export const InviteTab: React.FC<InviteTabProps> = ({ user }) => {
   const [referralInfo, setReferralInfo] = useState<any>(null);
   const [referrals, setReferrals] = useState<Referral[]>([]);
   const [loading, setLoading] = useState(true);
