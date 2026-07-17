@@ -1,10 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { apiClient } from '../lib/api';
-import { Task } from '../types';
+import { Task, User } from '../types';
 import { initTelegram } from '../lib/telegram';
 import { t } from '../lib/i18n';
 
-export const TasksTab: React.FC = () => {
+// Định nghĩa Interface nhận vào Props từ App.tsx để sửa lỗi TypeScript
+interface TasksTabProps {
+  user: User;
+  onRefreshUser: () => Promise<void>;
+}
+
+export const TasksTab: React.FC<TasksTabProps> = ({ user, onRefreshUser }) => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [completedTaskIds, setCompletedTaskIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -46,6 +52,9 @@ export const TasksTab: React.FC = () => {
       haptic?.notification('success');
       setCompletedTaskIds([...completedTaskIds, task._id]);
       alert(t('taskCompleted'));
+      
+      // Tự động làm mới số dư Vàng ở Header ngay khi nhận thưởng nhiệm vụ thành công
+      await onRefreshUser();
     } catch (error: any) {
       console.error('Task completion error:', error);
       haptic?.notification('error');
