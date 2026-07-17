@@ -5,13 +5,14 @@ import { initTelegram } from '../lib/telegram';
 import { t } from '../lib/i18n';
 import { User } from '../types';
 
-// Định nghĩa Interface nhận vào Props từ App.tsx để sửa lỗi biên dịch TypeScript
+// Định nghĩa đầy đủ Props để khớp với App.tsx (Sửa lỗi TS2322)
 interface AdsTabProps {
   user: User;
   onRefreshUser: () => Promise<void>;
 }
 
-export const AdsTab: React.FC<AdsTabProps> = ({ user, onRefreshUser }) => {
+// Chỉ bóc tách onRefreshUser, giữ nguyên định nghĩa Props nhưng không lấy 'user' ra để tránh lỗi TS6133
+export const AdsTab: React.FC<AdsTabProps> = ({ onRefreshUser }) => {
   const [remainingAds, setRemainingAds] = useState(15);
   const [loading, setLoading] = useState(false);
   const [adsgramBlockId, setAdsgramBlockId] = useState('0');
