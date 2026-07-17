@@ -9,9 +9,12 @@ export const AdsTab: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [adsgramBlockId, setAdsgramBlockId] = useState('0');
 
-  // Khởi tạo và lấy thông tin Telegram user
+  // Lấy haptic an toàn từ hàm cũ của bạn
   const telegram = initTelegram();
-  const { haptic, user } = telegram || {};
+  const { haptic } = (telegram as any) || {};
+
+  // Lấy thông tin User trực tiếp từ WebApp SDK để tránh lỗi ép kiểu TypeScript khi build
+  const tgUser = (window as any).Telegram?.WebApp?.initDataUnsafe?.user;
 
   useEffect(() => {
     loadAdStatus();
@@ -43,7 +46,8 @@ export const AdsTab: React.FC = () => {
       return;
     }
 
-    const telegramId = user?.id;
+    // Kiểm tra ID Telegram thông qua biến tgUser vừa tạo
+    const telegramId = tgUser?.id;
     if (!telegramId) {
       haptic?.notification('error');
       alert('Không tìm thấy thông tin tài khoản Telegram của bạn!');
@@ -54,20 +58,19 @@ export const AdsTab: React.FC = () => {
     haptic?.impact('medium');
 
     try {
-      // Khởi tạo Adsgram với Block ID và Telegram ID của User
+      // Truyền cả block ID và telegram ID vào hàm khởi tạo Adsgram
       const ad = initAdsgram(adsgramBlockId, telegramId);
       if (!ad) {
         throw new Error('Adsgram not initialized');
       }
 
-      // Đợi người dùng xem hết quảng cáo thành công
       const isFinished = await ad.showAd();
 
       if (isFinished) {
         haptic?.notification('success');
         alert('🎉 Bạn đã xem hết quảng cáo! Phần thưởng đang được xử lý cộng vào tài khoản của bạn.');
         
-        // Chờ 1.5 giây để webhook phía backend hoàn tất xử lý rồi cập nhật lại giao diện số lượt xem
+        // Chờ 1.5 giây để webhook phía backend cập nhật database xong rồi tải lại số lượt còn lại
         setTimeout(() => {
           loadAdStatus();
         }, 1500);
