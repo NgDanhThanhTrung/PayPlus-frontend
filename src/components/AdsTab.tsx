@@ -9,7 +9,9 @@ export const AdsTab: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [adsgramBlockId, setAdsgramBlockId] = useState('0');
 
-  const { haptic } = initTelegram() || {};
+  // Khởi tạo và lấy thông tin Telegram user
+  const telegram = initTelegram();
+  const { haptic, user } = telegram || {};
 
   useEffect(() => {
     loadAdStatus();
@@ -41,21 +43,39 @@ export const AdsTab: React.FC = () => {
       return;
     }
 
+    const telegramId = user?.id;
+    if (!telegramId) {
+      haptic?.notification('error');
+      alert('Không tìm thấy thông tin tài khoản Telegram của bạn!');
+      return;
+    }
+
     setLoading(true);
     haptic?.impact('medium');
 
     try {
-      const ad = initAdsgram(adsgramBlockId);
+      // Khởi tạo Adsgram với Block ID và Telegram ID của User
+      const ad = initAdsgram(adsgramBlockId, telegramId);
       if (!ad) {
         throw new Error('Adsgram not initialized');
       }
 
-      await ad.showAd();
-      haptic?.notification('success');
+      // Đợi người dùng xem hết quảng cáo thành công
+      const isFinished = await ad.showAd();
 
-      // Call backend to record ad view
-      const response = await apiClient.watchAd();
-      setRemainingAds(response.data.remainingAds);
+      if (isFinished) {
+        haptic?.notification('success');
+        alert('🎉 Bạn đã xem hết quảng cáo! Phần thưởng đang được xử lý cộng vào tài khoản của bạn.');
+        
+        // Chờ 1.5 giây để webhook phía backend hoàn tất xử lý rồi cập nhật lại giao diện số lượt xem
+        setTimeout(() => {
+          loadAdStatus();
+        }, 1500);
+      } else {
+        haptic?.notification('error');
+        alert('Bạn cần xem hết video quảng cáo để nhận thưởng!');
+      }
+
     } catch (error) {
       console.error('Ad error:', error);
       haptic?.notification('error');
