@@ -1,6 +1,8 @@
 import axios from 'axios';
 // Bước 1: Import các Type/Interface từ file types.ts
 import { Config, User, Task } from '../types'; 
+// Import thực thể tg đã được thiết lập từ file telegram.ts
+import { tg } from './telegram';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -11,9 +13,9 @@ const api = axios.create({
   },
 });
 
-// Add initData to all protected requests
+// Add initData to all protected requests (Đã chuyển sang dùng trực tiếp thực thể tg)
 api.interceptors.request.use((config) => {
-  const initData = (window as any).Telegram?.WebApp?.initData;
+  const initData = tg?.initData;
   if (initData && !config.url?.includes('/config')) {
     config.headers['x-telegram-init-data'] = initData;
   }
