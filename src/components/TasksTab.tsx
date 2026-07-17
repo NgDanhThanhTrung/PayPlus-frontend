@@ -4,13 +4,13 @@ import { Task, User } from '../types';
 import { initTelegram } from '../lib/telegram';
 import { t } from '../lib/i18n';
 
-// Định nghĩa Interface nhận vào Props từ App.tsx để sửa lỗi TypeScript
+// Khai báo cấu trúc Props đồng bộ nhận vào object user từ App.tsx
 interface TasksTabProps {
   user: User;
-  onRefreshUser: () => Promise<void>;
 }
 
-export const TasksTab: React.FC<TasksTabProps> = ({ user, onRefreshUser }) => {
+// Giữ cấu trúc Props nhưng không bóc tách biến 'user' để tránh lỗi TS6133 (unused variable)
+export const TasksTab: React.FC<TasksTabProps> = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [completedTaskIds, setCompletedTaskIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -52,9 +52,6 @@ export const TasksTab: React.FC<TasksTabProps> = ({ user, onRefreshUser }) => {
       haptic?.notification('success');
       setCompletedTaskIds([...completedTaskIds, task._id]);
       alert(t('taskCompleted'));
-      
-      // Tự động làm mới số dư Vàng ở Header ngay khi nhận thưởng nhiệm vụ thành công
-      await onRefreshUser();
     } catch (error: any) {
       console.error('Task completion error:', error);
       haptic?.notification('error');
