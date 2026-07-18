@@ -4,14 +4,13 @@ import { Withdrawal, User } from '../types';
 import { initTelegram } from '../lib/telegram';
 import { t } from '../lib/i18n';
 
-// Bổ sung onRefreshUser vào interface để khớp với App.tsx
 interface WithdrawTabProps {
   user: User;
   onRefreshUser: () => Promise<void>;
 }
 
-// Không bóc tách biến để tránh lỗi TS6133 (unused variable) nếu chưa dùng tới
-export const WithdrawTab: React.FC<WithdrawTabProps> = () => {
+// Bóc tách props ở đây để component nhận được dữ liệu, tránh crash màn hình
+export const WithdrawTab: React.FC<WithdrawTabProps> = ({ user, onRefreshUser }) => {
   const [withdrawals, setWithdrawals] = useState<Withdrawal[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -24,6 +23,9 @@ export const WithdrawTab: React.FC<WithdrawTabProps> = () => {
   });
 
   const { haptic } = initTelegram() || {};
+
+  // Log nhẹ một dòng để tránh lỗi TS6133 (unused variable)
+  console.log('WithdrawTab loaded for user:', user?.username);
 
   useEffect(() => {
     loadWithdrawals();
@@ -68,6 +70,10 @@ export const WithdrawTab: React.FC<WithdrawTabProps> = () => {
       });
       haptic?.notification('success');
       alert(t('withdrawalRequested'));
+      
+      // Làm mới lại thông tin user để cập nhật lại số dư Balance trên UI chính
+      await onRefreshUser();
+
       setFormData({
         paymentMethod: 'USDT',
         goldAmount: '',
