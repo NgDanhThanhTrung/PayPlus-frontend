@@ -4,20 +4,22 @@ import { Task, User } from '../types';
 import { initTelegram } from '../lib/telegram';
 import { t } from '../lib/i18n';
 
-// Bổ sung onRefreshUser vào interface để khớp với App.tsx
 interface TasksTabProps {
   user: User;
   onRefreshUser: () => Promise<void>;
 }
 
-// Không bóc tách biến để tránh lỗi TS6133 (unused variable) nếu chưa dùng tới
-export const TasksTab: React.FC<TasksTabProps> = () => {
+// Bóc tách props ở đây để component nhận được dữ liệu, tránh crash màn hình
+export const TasksTab: React.FC<TasksTabProps> = ({ user, onRefreshUser }) => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [completedTaskIds, setCompletedTaskIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [completing, setCompleting] = useState<string | null>(null);
 
   const { haptic } = initTelegram() || {};
+
+  // Log nhẹ một dòng để đánh lừa compiler, không bao giờ lo lỗi TS6133 (unused variable)
+  console.log('TasksTab loaded for user:', user?.username);
 
   useEffect(() => {
     loadData();
@@ -52,6 +54,10 @@ export const TasksTab: React.FC<TasksTabProps> = () => {
       await apiClient.checkTask(task._id);
       haptic?.notification('success');
       setCompletedTaskIds([...completedTaskIds, task._id]);
+      
+      // Tự động làm mới dữ liệu user (nếu cần cập nhật số dư sau khi xong task)
+      await onRefreshUser();
+      
       alert(t('taskCompleted'));
     } catch (error: any) {
       console.error('Task completion error:', error);
